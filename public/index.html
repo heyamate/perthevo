@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Growth of Perth</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body, #map-canvas {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script type="text/javascript" src="javascript/geoxml3.js"></script>
+    <script type="text/javascript" src="resources/population.js"></script>
+    <script>
+google.maps.visualRefresh = true;  // new visual style for Google products
+
+basecolor = "1400ff";
+
+var map;
+var polygons = {};
+function initialize() {
+  var mapOptions = {
+    zoom: 10,
+    center: new google.maps.LatLng(-31.968884,115.931338),
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+  map = new google.maps.Map(document.getElementById('map-canvas'),
+      mapOptions);
+
+  var myParser = new geoXML3.parser({
+	  map: map,
+	  createPolygon: addPolygon,
+	  afterParse: afterParse
+  });
+  myParser.parse('resources/LGA2011_perth_metro_simplified.kml');
+
+  function addPolygon(poly, doc) {
+	  // remove the (S), (T), etc after the name
+	  poly.name = poly.name.substr(0, poly.name.indexOf("(") - 1);
+	  poly.style.color = "ffffffff";
+	  poly.style.fill = true;
+	  poly.style.fillcolor = "00" + basecolor;
+	  googlepoly = myParser.createPolygon(poly, doc);
+	  googlepoly.active = true;
+	  polygons[poly.name] = googlepoly;
+	  return googlepoly;
+  }
+
+  function afterParse(docs) {
+	  displayYear("1991");
+  }
+}
+
+function displayYear(year) {
+	population = populations[year];
+	for(var council in population) {
+		var polygon = polygons[council];
+		polygon.setOptions({fillOpacity: 0.5});
+	}
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+</html>

@@ -1,0 +1,3 @@
+class PerthevoController < ApplicationController
+
+end
